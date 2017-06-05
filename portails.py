@@ -3,12 +3,9 @@ import re
 import mwclient
 from mwclient import page
 
-portail = re.compile("{{Portail[\w|\|| |'|à|ç|é|è|ê|ë|ï|î|û|ù]+}}")
-separation = re.compile("{{Portail\||}}|\|")
+portail = re.compile(u"{{Portail\|[\w|\|| |'|à|ç|é|è|ê|ë|ï|î|û|ù]+}}")
+separation = re.compile("{cod{Portail\||}}|\|")
 site = mwclient.Site('fr.wikipedia.org')
-
-pagesTitles = ["Nicole Abar", "Juliette Adam", "Marie-Jo Bonnet"]
-refPortails = ["LGBT"]
 
 def portails(string):
     search = portail.search(string)
@@ -20,15 +17,20 @@ def portails(string):
 
 def portailsDe(pages):
     result = {}
-    for title in pagesTitles:
+    for title in pages:
         result[title] = {}
         print title
-        result[title]["Portails"] = [i for i in portails(site.Pages[title].text()) if len(i) > 0]
+        page = site.Pages[title.encode().decode()]
+        result[title]["Portails"] = [i for i in portails(page.text()) if len(i) > 0]
+    with open("dump.json", "w") as file:
+        data = json.dumps(result, indent=2)
+        file.write(data)
     return result
 
 def aPortails():
-    return ""
+    with open("input.txt") as file:
+        input = file.read()
+        sep = re.compile("\n")
+        portailsDe(sep.split(input))
 
-print portailsDe(pagesTitles)
-
-
+print aPortails()
